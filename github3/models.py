@@ -169,12 +169,15 @@ class GitHubCore(GitHubObject):
         __logs__.info('JSON was %sreturned', 'not ' if ret is None else '')
         return ret
 
-    def _boolean(self, response, true_code, false_code):
+    def _boolean(self, response, true_codes, false_codes):
         if response is not None:
             status_code = response.status_code
-            if status_code == true_code:
+            if (isinstance(true_codes, int) and status_code == true_codes or
+                isinstance(true_codes, list) and status_code in true_codes):
                 return True
-            if status_code != false_code and status_code >= 400:
+            if (isinstance(false_codes, int) and status_code != false_codes or
+                isinstance(false_codes, list) and
+                status_code not in false_codes) and status_code >= 400:
                 raise exceptions.error_for(response)
         return False
 
