@@ -235,7 +235,7 @@ class GitHub(GitHubCore):
         json = None
 
         if client_id and client_secret:
-            #TODO: check size?
+            # TODO: check size?
             url = self._build_url('authorizations', 'clients', client_id)
             data = {'client_secret': client_secret, 'note': note,
                     'note_url': note_url, 'fingerprint': fingerprint}
@@ -243,12 +243,9 @@ class GitHub(GitHubCore):
                 data['scopes'] = scopes
 
             # 2 possible return codes: 200 and 201
-            json = (self._json(self._put(url, data=data), 200) or
-                    self._json(self._put(url, data=data), 201))
+            json = (self._json(self._put(url, data=data), [200, 201]))
 
         return self._instance_or_null(Authorization, json)
-
-
 
     def create_gist(self, description, files, public=True):
         """Create a new gist.
