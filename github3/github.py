@@ -206,6 +206,50 @@ class GitHub(GitHubCore):
             return self._boolean(resp, 200, 404)
         return False
 
+    def get_or_create_app_authorization(self, client_id, client_secret,
+                                        scopes=None, note='', note_url='',
+                                        fingerprint=''):
+        """Get or create an authorization for an app
+
+        Create a new authorization for the specified OAuth application, only
+        if an authorization for that application doesn't already exist for the
+        user.
+
+        :param str client_id: (required), the 20 character client ID for the
+            OAuth app that is requesting the token
+        :param str client_secret: (required), the 40 character OAuth app client
+            secret associated with the client ID
+        :param list scopes: (optional), areas you want this token to apply to,
+            i.e., 'gist', 'user'
+        :param str note: (optional), note about the authorization
+        :param str note_url: (optional), url for the application
+        :param str client_id: (optional), 20 character OAuth client key for
+            which to create a token
+        :param str client_secret: (optional), 40 character OAuth client secret
+            for which to create the token
+        :param str fingerprint: (optional), a unique string to distinguish an
+            authorization from others created for the same client ID and user
+
+        :returns: :class:`Authorization <Authorization>`
+        """
+        json = None
+
+        if client_id and client_secret:
+            #TODO: check size?
+            url = self._build_url('authorizations', 'clients', client_id)
+            data = {'client_secret': client_secret, 'note': note,
+                    'note_url': note_url, 'fingerprint': fingerprint}
+            if scopes:
+                data['scopes'] = scopes
+
+            # 2 possible return codes: 200 and 201
+            json = (self._json(self._put(url, data=data), 200) or
+                    self._json(self._put(url, data=data), 201))
+
+        return self._instance_or_null(Authorization, json)
+
+
+
     def create_gist(self, description, files, public=True):
         """Create a new gist.
 
