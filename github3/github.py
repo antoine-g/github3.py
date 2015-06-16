@@ -118,7 +118,10 @@ class GitHub(GitHubCore):
 
     @requires_basic_auth
     def authorization(self, id_num):
-        """Get information about authorization ``id``.
+        """Get information about authorization ``id``. Since April 20, 2015 the
+        value of ``token`` is empty ``hashed_token`` and ``fingerprint`` are
+        returned instead in the resulting :class:`Authorization <Authorization>`
+        .
 
         :param int id_num: (required), unique id of the authorization
         :returns: :class:`Authorization <Authorization>`
@@ -132,7 +135,10 @@ class GitHub(GitHubCore):
     @requires_basic_auth
     def authorizations(self, number=-1, etag=None):
         """Iterate over authorizations for the authenticated user. This will
-        return a 404 if you are using a token for authentication.
+        return a 404 if you are using a token for authentication. Since April
+        20, 2015 the value of ``token`` is empty, ``hashed_token`` and
+        ``fingerprint`` are returned instead in the resulting
+        :class:`Authorization <Authorization>`.
 
         :param int number: (optional), number of authorizations to return.
             Default: -1 returns all available authorizations
@@ -144,7 +150,7 @@ class GitHub(GitHubCore):
         return self._iter(int(number), url, Authorization, etag=etag)
 
     def authorize(self, username, password, scopes=None, note='', note_url='',
-                  client_id='', client_secret=''):
+                  client_id='', client_secret='', fingerprint=''):
         """Obtain an authorization token.
 
         The retrieved token will allow future consumers to use the API without
@@ -160,6 +166,8 @@ class GitHub(GitHubCore):
             which to create a token
         :param str client_secret: (optional), 40 character OAuth client secret
             for which to create the token
+        :param str fingerprint: (optional), a unique string to distinguish an
+            authorization from others created for the same client ID and user
         :returns: :class:`Authorization <Authorization>`
         """
         json = None
@@ -167,7 +175,8 @@ class GitHub(GitHubCore):
         if username and password:
             url = self._build_url('authorizations')
             data = {'note': note, 'note_url': note_url,
-                    'client_id': client_id, 'client_secret': client_secret}
+                    'client_id': client_id, 'client_secret': client_secret,
+                    'fingerprint': fingerprint}
             if scopes:
                 data['scopes'] = scopes
 

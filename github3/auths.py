@@ -36,6 +36,12 @@ class Authorization(GitHubCore):
         self.app = auth.get('app', {})
         #: Returns the Authorization token
         self.token = auth.get('token', '')
+        #: Returns the authorization fingerprint
+        self.fingerprint = auth.get('fingerprint', '')
+        #: Returns the hash of the authorization token
+        self.hashed_token = auth.get('hashed_token', '')
+        #: Returns the last 8 chars from the authorization token
+        self.token_last_eight = auth.get('token_last_eight', '')
         #: App name
         self.name = self.app.get('name', '')
         #: URL about the note
