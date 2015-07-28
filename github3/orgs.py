@@ -15,6 +15,7 @@ from .events import Event
 from .models import BaseAccount, GitHubCore
 from .repos import Repository
 from .users import User
+from .hooks import Hook
 from .decorators import requires_auth
 from uritemplate import URITemplate
 
@@ -332,6 +333,27 @@ class Organization(BaseAccount):
         return self._boolean(self._put(url), 204, 404)
 
     @requires_auth
+    def create_hook(self, name, config, events=['push'], active=True):
+        """Create a hook on this organization.
+        :param str name: (required), name of the hook
+        :param dict config: (required), key-value pairs which act as settings
+            for this hook
+        :param list events: (optional), events the hook is triggered for
+        :param bool active: (optional), whether the hook is actually
+            triggered
+        :returns: :class:`OrganizationHook
+            <github3.orgs.OrganizationHook>` if successful, otherwise
+            None
+        """
+        json = None
+        if name and config and isinstance(config, dict):
+            url = self._build_url('hooks', base_url=self._api)
+            data = {'name': name, 'config': config, 'events': events,
+                    'active': active}
+            json = self._json(self._post(url, data=data), 201)
+        return OrganizationHook(json, self) if json else None
+
+    @requires_auth
     def create_repository(self, name, description='', homepage='',
                           private=False, has_issues=True, has_wiki=True,
                           team_id=0, auto_init=False, gitignore_template='',
@@ -432,6 +454,32 @@ class Organization(BaseAccount):
             self._update_attributes(json)
             return True
         return False
+
+    @requires_auth
+    def hook(self, hook_id):
+        """Get a single hook.
+        :param int hook_id: (required), id of the hook
+        :returns: :class:`OrganizationHook <github3.orgs.OrganizationHook>`
+            if successful, otherwise None
+        """
+        json = None
+        if int(hook_id) > 0:
+            url = self._build_url('hooks', str(hook_id), base_url=self._api)
+            json = self._json(self._get(url), 200)
+        return self._instance_or_null(OrganizationHook, json)
+
+    @requires_auth
+    def hooks(self, number=-1, etag=None):
+        r"""Iterate over hooks registered on this repository.
+        :param int number: (optional), number of hoks to return. Default: -1
+            returns all hooks
+        :param str etag: (optional), ETag from a previous request to the same
+            endpoint
+        :returns: generator of :class:`OrganizationHook
+            <github3.orgs.OrganizationHook>`\ s
+        """
+        url = self._build_url('hooks', base_url=self._api)
+        return self._iter(int(number), url, OrganizationHook, etag=etag)
 
     def is_member(self, username):
         """Check if the user named ``username`` is a member.
@@ -613,3 +661,26 @@ class Membership(GitHubCore):
             self._update_attributes(json)
             return True
         return False
+
+
+class OrganizationHook(Hook):
+
+    """The :class:`OrganizationHook <Hook>` object. This handles the
+    information returned by GitHub about hooks set on an organization.
+
+    Two OrganizationHook instances can be checked like so::
+
+    h1 == h2
+    h1 != h2
+
+    And is equivalent to::
+
+    h1.id == h2.id
+    h1.id != h2.id
+
+    See also: https://developer.github.com/v3/orgs/hooks/
+
+    """
+
+    def _repr(self):
+        return '<OrganizationHook [{0}]>'.format(self.name)
