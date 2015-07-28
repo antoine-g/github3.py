@@ -93,6 +93,19 @@ class TestOrganization(IntegrationHelper):
 
             assert o.edit(location='Madison, WI') is True
 
+    def test_hooks(self):
+        """Test that a user can iterate over the hooks of an organization."""
+        self.basic_login()
+        cassette_name = self.cassette_name('hooks')
+        with self.recorder.use_cassette(cassette_name):
+            organization = self.gh.organization('github3py')
+            assert organization is not None
+            hooks = list(organization.hooks())
+
+        assert len(hooks) > 0
+        for hook in hooks:
+            assert isinstance(hook, github3.orgs.OrganizationHook)
+
     def test_is_member(self):
         """Test the ability to check if a User is a member of the org."""
         cassette_name = self.cassette_name('is_member')

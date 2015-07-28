@@ -218,6 +218,11 @@ class TestOrganizationRequiresAuth(UnitHelper):
         with pytest.raises(GitHubError):
             self.instance.create_team('foo')
 
+    def test_hooks(self):
+        """Show that a user must be authenticated to list hooks."""
+        with pytest.raises(GitHubError):
+            self.instance.hooks()
+
     def test_edit(self):
         """Show that a user must be authenticated to edit an organization."""
         with pytest.raises(GitHubError):
@@ -258,6 +263,17 @@ class TestOrganizationIterator(UnitIteratorHelper):
 
         self.session.get.assert_called_once_with(
             url_for('events'),
+            params={'per_page': 100},
+            headers={}
+        )
+
+    def test_hooks(self):
+        """Test the ability to iterate over hooks of an organization."""
+        i = self.instance.hooks()
+        self.get_next(i)
+
+        self.session.get.assert_called_once_with(
+            url_for('hooks'),
             params={'per_page': 100},
             headers={}
         )
