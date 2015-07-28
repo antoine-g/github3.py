@@ -27,7 +27,7 @@ from .commit import RepoCommit
 from .comparison import Comparison
 from .contents import Contents, validate_commmitter
 from .deployment import Deployment
-from .hook import Hook
+from .hook import RepositoryHook
 from .pages import PagesBuild, PagesInfo
 from .status import Status
 from .stats import ContributorStats
@@ -759,8 +759,8 @@ class Repository(GitHubCore):
         :param list events: (optional), events the hook is triggered for
         :param bool active: (optional), whether the hook is actually
             triggered
-        :returns: :class:`Hook <github3.repos.hook.Hook>` if successful,
-            otherwise None
+        :returns: :class:`RepositoryHook <github3.repos.hook.RepositoryHook>`
+            if successful, otherwise None
         """
         json = None
         if name and config and isinstance(config, dict):
@@ -768,7 +768,7 @@ class Repository(GitHubCore):
             data = {'name': name, 'config': config, 'events': events,
                     'active': active}
             json = self._json(self._post(url, data=data), 201)
-        return Hook(json, self) if json else None
+        return RepositoryHook(json, self) if json else None
 
     @requires_auth
     def create_issue(self,
@@ -1202,14 +1202,14 @@ class Repository(GitHubCore):
         """Get a single hook.
 
         :param int hook_id: (required), id of the hook
-        :returns: :class:`Hook <github3.repos.hook.Hook>` if successful,
-            otherwise None
+        :returns: :class:`RepositoryHook <github3.repos.hook.RepositoryHook>`
+            if successful, otherwise None
         """
         json = None
         if int(hook_id) > 0:
             url = self._build_url('hooks', str(hook_id), base_url=self._api)
             json = self._json(self._get(url), 200)
-        return self._instance_or_null(Hook, json)
+        return self._instance_or_null(RepositoryHook, json)
 
     @requires_auth
     def hooks(self, number=-1, etag=None):
@@ -1219,10 +1219,11 @@ class Repository(GitHubCore):
             returns all hooks
         :param str etag: (optional), ETag from a previous request to the same
             endpoint
-        :returns: generator of :class:`Hook <github3.repos.hook.Hook>`\ s
+        :returns: generator of :class:`RepositoryHook
+            <github3.repos.hook.RepositoryHook>`\ s
         """
         url = self._build_url('hooks', base_url=self._api)
-        return self._iter(int(number), url, Hook, etag=etag)
+        return self._iter(int(number), url, RepositoryHook, etag=etag)
 
     @requires_auth
     def ignore(self):
