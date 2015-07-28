@@ -205,7 +205,7 @@ class TestRepository(BaseCase):
 
         self.login()
         h = self.repo.create_hook(**self.conf['data'])
-        assert isinstance(h, repos.hook.Hook)
+        assert isinstance(h, repos.hook.RepositoryHook)
         self.mock_assertions()
 
     def test_create_issue(self):
@@ -434,7 +434,7 @@ class TestRepository(BaseCase):
         self.assertRaises(github3.GitHubError, self.repo.hook, 2)
 
         self.login()
-        assert isinstance(self.repo.hook(2), repos.hook.Hook)
+        assert isinstance(self.repo.hook(2), repos.hook.RepositoryHook)
         self.mock_assertions()
 
     def test_is_assignee(self):
@@ -721,22 +721,22 @@ class TestContents(BaseCase):
 class TestHook(BaseCase):
     def __init__(self, methodName='runTest'):
         super(TestHook, self).__init__(methodName)
-        self.hook = repos.hook.Hook(load('hook'))
+        self.hook = repos.hook.RepositoryHook(load('hook'))
         self.api = ("https://api.github.com/repos/sigmavirus24/github3.py/"
                     "hooks/292492")
 
     def setUp(self):
         super(TestHook, self).setUp()
-        self.hook = repos.hook.Hook(self.hook.as_dict(), self.g)
+        self.hook = repos.hook.RepositoryHook(self.hook.as_dict(), self.g)
 
     def test_equality(self):
-        h = repos.hook.Hook(load('hook'))
+        h = repos.hook.RepositoryHook(load('hook'))
         assert self.hook == h
         h._uniq = 1
         assert self.hook != h
 
     def test_repr(self):
-        assert repr(self.hook) == '<Hook [readthedocs]>'
+        assert repr(self.hook) == '<RepositoryHook [readthedocs]>'
 
     def test_delete(self):
         self.response('', 204)

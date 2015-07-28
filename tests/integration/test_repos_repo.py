@@ -223,7 +223,7 @@ class TestRepository(helper.IntegrationHelper):
 
         assert len(hooks) > 0
         for hook in hooks:
-            assert isinstance(hook, github3.repos.hook.Hook)
+            assert isinstance(hook, github3.repos.hook.RepositoryHook)
 
     def test_ignore(self):
         """Test that a user can ignore the notifications on a repository."""
